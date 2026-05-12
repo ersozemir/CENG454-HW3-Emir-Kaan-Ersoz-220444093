@@ -12,7 +12,6 @@ public class EnemySpawner : MonoBehaviour
 
     void Update()
     {
-        // If it's time to spawn a new enemy, do so and set the next spawn time
         if (Time.time >= _nextSpawnTime)
         {
             SpawnEnemy();
@@ -22,21 +21,34 @@ public class EnemySpawner : MonoBehaviour
 
     private void SpawnEnemy()
     {
-        // Create a random position on a circle around the core target
+        // Random position on a circle around the core target
         Vector3 spawnPos = Random.onUnitSphere * spawnDistance;
-        spawnPos.y = 0; // To keep enemies on the ground
+        spawnPos.y = 0.5f; // Keep enemies on the ground level
 
+        // Create the enemy and get its script component
         GameObject newEnemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
         Enemy enemyScript = newEnemy.GetComponent<Enemy>();
 
         if (enemyScript != null)
         {
-            // Choose a strategy at random (%50 Linear, %50 ZigZag)
-            IEnemyStrategy randomStrategy = Random.value > 0.5f 
+            // 3. Choose base strategy randomly (Linear or ZigZag)
+            IEnemyStrategy baseStrategy = Random.value > 0.5f 
                 ? new LinearMoveStrategy() 
                 : new ZigZagMoveStrategy();
 
-            enemyScript.Initialize(coreTarget, randomStrategy);
+            // Apply decorators with certain probabilities
+            if (Random.value < 0.3f)
+            {
+                // put the current strategy inside a SpeedDecorator to enhance speed
+                baseStrategy = new SpeedDecorator(baseStrategy, 2.0f);
+                
+                // Make yellow the enemies that are faster than normal
+                var renderer = newEnemy.GetComponent<Renderer>();
+                if (renderer != null) renderer.material.color = Color.yellow;
+            }
+
+            // create enemy with the chosen strategy and initialize it with the core target
+            enemyScript.Initialize(coreTarget, baseStrategy);
         }
     }
 }
