@@ -26,6 +26,11 @@ public class CoreHealth : MonoBehaviour, IDamageable
         {
             Debug.Log("Core Breached! Game Over.");
             // Logic for Lose Condition (Task 2.1)
+            
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.GameOver();
+            }
         }
     }
 }

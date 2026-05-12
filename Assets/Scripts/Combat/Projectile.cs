@@ -8,7 +8,6 @@ public class Projectile : MonoBehaviour
 
     void OnEnable()
     {
-        // Reset state when activated
         _timer = lifeTime;
     }
 
@@ -27,9 +26,13 @@ public class Projectile : MonoBehaviour
     {
         if (other.CompareTag("Enemy"))
         {
-            // Damage logic
+            
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.AddScore(); // Increase score when an enemy is hit
+            }
+
             Destroy(other.gameObject); 
-            // Send back to pool
             ObjectPool.Instance.ReturnToPool(gameObject);
         }
     }
